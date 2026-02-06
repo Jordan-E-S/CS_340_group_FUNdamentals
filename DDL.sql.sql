@@ -1,3 +1,6 @@
+-- Jordan Smith & Arthur Franklyn
+-- Code yanked from phpMyAdmin export process
+--
 -- phpMyAdmin SQL Dump
 -- version 5.2.3-1.el9.remi
 -- https://www.phpmyadmin.net/
