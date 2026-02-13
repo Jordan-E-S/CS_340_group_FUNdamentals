@@ -1,0 +1,51 @@
+{% extends "main.j2" %}
+{% block content %}
+
+<h1>Board Games</h1>
+
+<h2>Add Board Game</h2>
+<form action="/add_boardgame" method="POST">
+  Title: <input type="text" name="title"><br>
+  Publisher: <input type="text" name="publisher"><br>
+  Min Players: <input type="int" name="minPlayers"><br>
+  Max Players: <input type="int" name="MaxPlayers"><br>
+  Complexity: <input type="int" name="complexity"><br>
+  Genre:
+  <select name="genreID">
+    {% for genre in genres %}
+      <option value="{{ genre.genreID }}">{{ genre.genreName }}</option>
+    {% endfor %}
+  </select><br>
+  <input type="submit" value="Add Board Game">
+</form>
+
+<h2>Add New Genre</h2>
+<form action="/add_genre" method="POST">
+  Genre Name: <input type="text" name="genreName">
+  <input type="submit" value="Add Genre">
+</form>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Publisher</th>
+        <th>Players</th>
+        <th>Complexity</th>
+        <th>Genre</th>
+    </tr>
+
+    {% for game in boardgames %}
+    <tr>
+        <td>{{ game.boardGameID }}</td>
+        <td>{{ game.title }}</td>
+        <td>{{ game.publisher }}</td>
+        <td>{{ game.minPlayers }} - {{ game.maxPlayers }}</td>
+        <td>{{ game.complexity }}</td>
+        <td>{{ game.genre }}</td>
+        
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "main.j2" %}
+{% block content %}
+
+<h1>Staff</h1>
+
+<h2>Add Staff Member</h2>
+<form action="/add_staff" method="POST">
+    First Name: <input type="text" name="firstName"><br>
+    Last Name: <input type="text" name="lastName"><br>
+    <input type="submit" value="Add Staff">
+</form>
+
+<table border="1">
+<tr>
+    <th>ID</th>
+    <th>First Name</th>
+    <th>Last Name</th>
+</tr>
+
+{% for member in staff %}
+<tr>
+    <td>{{ member.staffID }}</td>
+    <td>{{ member.firstName }}</td>
+    <td>{{ member.lastName }}</td>
+</tr>
+{% endfor %}
+</table>
+
+{% endblock %}

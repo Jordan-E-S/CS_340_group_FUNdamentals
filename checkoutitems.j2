@@ -1,0 +1,48 @@
+{% extends "main.j2" %}
+{% block content %}
+
+<h1>Checkout Items</h1>
+
+<h2>Add Item to Checkout</h2>
+<form action="/add_checkoutitem" method="POST">
+  Checkout:
+  <select name="checkoutID">
+    {% for checkout in checkouts %}
+      <option value="{{ checkout.checkoutID }}">
+        {{ checkout.checkoutID }}
+      </option>
+    {% endfor %}
+  </select><br>
+
+  Board Game:
+  <select name="boardGameID">
+    {% for game in boardgames %}
+      <option value="{{ game.boardGameID }}">
+        {{ game.title }}
+      </option>
+    {% endfor %}
+  </select><br>
+
+  <input type="submit" value="Add Item">
+</form>
+
+<br><br>
+
+<table border="1">
+<tr>
+    <th>CheckoutItem ID</th>
+    <th>Checkout ID</th>
+    <th>Board Game</th>
+</tr>
+
+{% for item in checkoutitems %}
+<tr>
+    <td>{{ item.checkoutItemID }}</td>
+    <td>{{ item.checkoutID }}</td>
+    <td>{{ item.title }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+{% endblock %}
