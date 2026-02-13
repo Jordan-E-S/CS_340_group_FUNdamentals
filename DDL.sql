@@ -256,7 +256,7 @@ ALTER TABLE `Staff`
 -- Constraints for table `BoardGames`
 --
 ALTER TABLE `BoardGames`
-  ADD CONSTRAINT `fk_BoardGames_GaneGenres1` FOREIGN KEY (`GameGenres_gameGenreID`) REFERENCES `GameGenres` (`gameGenreID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `fk_BoardGames_GameGenres1` FOREIGN KEY (`GameGenres_gameGenreID`) REFERENCES `GameGenres` (`gameGenreID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `CheckoutItems`
