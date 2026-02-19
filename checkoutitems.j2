@@ -1,48 +1,81 @@
 {% extends "main.j2" %}
 {% block content %}
 
-<h1>Checkout Items</h1>
+<h1>Checkout Items (M:M)</h1>
 
 <h2>Add Item to Checkout</h2>
 <form action="/add_checkoutitem" method="POST">
-  Checkout:
-  <select name="checkoutID">
-    {% for checkout in checkouts %}
-      <option value="{{ checkout.checkoutID }}">
-        {{ checkout.checkoutID }}
-      </option>
+  <label>Checkout (Patron):</label>
+  <select name="checkoutID" required>
+    {% for c in checkouts %}
+      <option value="{{ c.checkoutID }}">{{ c.checkoutID }} — {{ c.patronName }}</option>
     {% endfor %}
   </select><br>
 
-  Board Game:
-  <select name="boardGameID">
-    {% for game in boardgames %}
-      <option value="{{ game.boardGameID }}">
-        {{ game.title }}
-      </option>
+  <label>Board Game:</label>
+  <select name="boardGameID" required>
+    {% for g in boardgames %}
+      <option value="{{ g.boardGameID }}">{{ g.title }}</option>
     {% endfor %}
   </select><br>
 
-  <input type="submit" value="Add Item">
+  <button type="submit">Add Item</button>
 </form>
 
-<br><br>
-
+<h2>Current Checkout Items</h2>
 <table border="1">
-<tr>
+  <tr>
     <th>CheckoutItem ID</th>
-    <th>Checkout ID</th>
+    <th>Checkout</th>
+    <th>Patron</th>
     <th>Board Game</th>
-</tr>
+    <th>Update</th>
+    <th>Delete</th>
+  </tr>
 
-{% for item in checkoutitems %}
-<tr>
-    <td>{{ item.checkoutItemID }}</td>
-    <td>{{ item.checkoutID }}</td>
-    <td>{{ item.title }}</td>
-</tr>
-{% endfor %}
+  {% for ci in checkoutitems %}
+  <tr>
+    <form action="/update_checkoutitem" method="POST">
+      <td>
+        {{ ci.checkoutItemID }}
+        <input type="hidden" name="checkoutItemID" value="{{ ci.checkoutItemID }}">
+      </td>
 
+      <td>
+        <select name="checkoutID" required>
+          {% for c in checkouts %}
+            <option value="{{ c.checkoutID }}"
+              {% if c.checkoutID|string == ci.Checkouts_checkoutID|string %}selected{% endif %}>
+              {{ c.checkoutID }} — {{ c.patronName }}
+            </option>
+          {% endfor %}
+        </select>
+      </td>
+
+      <td>{{ ci.patronName }}</td>
+
+      <td>
+        <select name="boardGameID" required>
+          {% for g in boardgames %}
+            <option value="{{ g.boardGameID }}"
+              {% if g.boardGameID|string == ci.BoardGames_boardGameID|string %}selected{% endif %}>
+              {{ g.title }}
+            </option>
+          {% endfor %}
+        </select>
+      </td>
+
+      <td><button type="submit">Update</button></td>
+    </form>
+
+    <td>
+      <form action="/delete_checkoutitem" method="POST">
+        <input type="hidden" name="checkoutItemID" value="{{ ci.checkoutItemID }}">
+        <button type="submit">Delete</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
 </table>
 
 {% endblock %}

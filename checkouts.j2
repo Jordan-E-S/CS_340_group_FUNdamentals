@@ -3,32 +3,6 @@
 
 <h1>Checkouts</h1>
 
-<h2>Log New Checkout</h2>
-<form action="/add_checkout" method="POST">
-  Patron:
-  <select name="patronID">
-    {% for patron in patrons %}
-      <option value="{{ patron.patronID }}">
-        {{ patron.firstName }} {{ patron.lastName }}
-      </option>
-    {% endfor %}
-  </select><br>
-
-  Staff:
-  <select name="staffID">
-    {% for staff in staffMembers %}
-      <option value="{{ staff.staffID }}">
-        {{ staff.firstName }} {{ staff.lastName }}
-      </option>
-    {% endfor %}
-  </select><br>
-
-  Date:
-  <input type="date" name="checkoutDate"><br>
-
-  <input type="submit" value="Create Checkout">
-</form>
-
 <table border="1">
 <tr>
     <th>ID</th>
@@ -44,9 +18,9 @@
     <td>{{ c.checkoutID }}</td>
     <td>{{ c.checkoutDate }}</td>
     <td>{{ c.dueDate }}</td>
-    <td>{{ c.returnDate }}</td>
-    <td>{{ c.patronFirstName }}</td>
-    <td>{{ c.staffFirstName }}</td>
+    <td>{{ c.returnDate or "" }}</td>
+    <td>{{ c.patronFirstName }} {{ c.patronLastName }}</td>
+    <td>{{ c.staffFirstName }} {{ c.staffLastName }}</td>
 </tr>
 {% endfor %}
 </table>

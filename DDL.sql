@@ -93,7 +93,7 @@ CREATE TABLE `Checkouts` (
 --
 
 INSERT INTO `Checkouts` (`checkoutID`, `checkoutDate`, `dueDate`, `returnDate`, `Patrons_patronID`, `Staff_staffID`) VALUES
-(1, '2026-01-01', '0000-00-00', NULL, 1, 1),
+(1, '2026-01-01', '2026-01-08', NULL, 1, 1),
 (2, '2026-02-05', '2026-02-06', '2026-02-06', 2, 2),
 (3, '2026-02-06', '2026-02-20', NULL, 3, 3);
 
@@ -171,7 +171,7 @@ INSERT INTO `Staff` (`staffID`, `firstName`, `lastName`) VALUES
 --
 ALTER TABLE `BoardGames`
   ADD PRIMARY KEY (`boardGameID`),
-  ADD KEY `fk_BoardGames_GaneGenres1_idx` (`GameGenres_gameGenreID`);
+  ADD KEY `fk_BoardGames_GameGenres1_idx` (`GameGenres_gameGenreID`);
 
 --
 -- Indexes for table `CheckoutItems`

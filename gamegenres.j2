@@ -1,0 +1,38 @@
+{% extends "main.j2" %}
+{% block content %}
+
+<h1>Game Genres</h1>
+
+{% if request.args.get('error') == 'genre_in_use' %}
+  <p style="color:red;">Cannot delete genre: it is referenced by one or more board games.</p>
+{% endif %}
+
+<h2>Add a Genre</h2>
+<form method="POST" action="/add_genre">
+  <label>Genre:</label>
+  <input type="text" name="genre" required>
+  <button type="submit">Add Genre</button>
+</form>
+
+<h2>Current Genres</h2>
+<table border="1">
+  <tr>
+    <th>ID</th>
+    <th>Genre</th>
+    <th>Delete</th>
+  </tr>
+  {% for g in genres %}
+  <tr>
+    <td>{{ g.gameGenreID }}</td>
+    <td>{{ g.genre }}</td>
+    <td>
+      <form method="POST" action="/delete_genre">
+        <input type="hidden" name="gameGenreID" value="{{ g.gameGenreID }}">
+        <button type="submit">Delete</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+{% endblock %}
