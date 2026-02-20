@@ -1,4 +1,4 @@
-# Based on the flask template provided from the cs340 course with original modifications by Jordan Smith. 
+# Based on the flask template provided from the cs340 course with original modifications by Jordan Smith & Arthur Franklyn. 
 # Further modified by chatgpt for bug eliminnation and code cleanup.
 # The above applies to all code related to this project step 3, including the database connector and the html templates.
 # ########################################
