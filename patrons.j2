@@ -1,46 +1,33 @@
 {% extends "main.j2" %}
 {% block content %}
-
 <h1>Patrons</h1>
 
 {% if request.args.get('error') == 'patron_has_checkouts' %}
-  <p style="color:red;">Cannot delete patron: they have one or more checkouts.</p>
+<p style="color:red;">Cannot delete patron with active checkouts.</p>
 {% endif %}
 
-<h2>Add Patron</h2>
-<form action="/add_patron" method="POST">
-  First Name: <input type="text" name="firstName" required><br>
-  Last Name: <input type="text" name="lastName" required><br>
-  Email: <input type="email" name="email" required><br>
-  Phone: <input type="text" name="phoneNumber"><br>
-  <input type="submit" value="Add Patron">
+<form method="POST" action="/add_patron">
+First: <input name="firstName" required>
+Last: <input name="lastName" required>
+Email: <input name="email" required>
+Phone: <input name="phoneNumber">
+<button>Add</button>
 </form>
 
 <table border="1">
+<tr><th>ID</th><th>Name</th><th>Email</th><th>Delete</th></tr>
+{% for p in patrons %}
 <tr>
-    <th>ID</th>
-    <th>First</th>
-    <th>Last</th>
-    <th>Email</th>
-    <th>Phone</th>
-    <th>Delete</th>
-</tr>
-
-{% for patron in patrons %}
-<tr>
-    <td>{{ patron.patronID }}</td>
-    <td>{{ patron.firstName }}</td>
-    <td>{{ patron.lastName }}</td>
-    <td>{{ patron.email }}</td>
-    <td>{{ patron.phoneNumber }}</td>
-    <td>
-      <form action="/delete_patron" method="POST">
-        <input type="hidden" name="patronID" value="{{ patron.patronID }}">
-        <button type="submit">Delete</button>
-      </form>
-    </td>
+<td>{{ p.patronID }}</td>
+<td>{{ p.firstName }} {{ p.lastName }}</td>
+<td>{{ p.email }}</td>
+<td>
+<form method="POST" action="/delete_patron">
+<input type="hidden" name="patronID" value="{{ p.patronID }}">
+<button>Delete</button>
+</form>
+</td>
 </tr>
 {% endfor %}
 </table>
-
 {% endblock %}
