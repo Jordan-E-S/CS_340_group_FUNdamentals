@@ -1,13 +1,7 @@
 -- Jordan Smith & Arthur Franklyn
 -- CS340 Final Project
 -- Board Game Library Database
--- DDL wrapped in stored procedure to reset database
-
-DROP PROCEDURE IF EXISTS sp_load_boardgamedb;
-DELIMITER //
-
-CREATE PROCEDURE sp_load_boardgamedb()
-BEGIN
+-- Auto-populating DDL (no stored procedures)
 
 SET FOREIGN_KEY_CHECKS=0;
 
@@ -31,11 +25,11 @@ CREATE TABLE GameGenres (
   UNIQUE (genre)
 ) ENGINE=InnoDB;
 
-INSERT INTO GameGenres (gameGenreID, genre) VALUES
-(1, 'Strategy'),
-(2, 'Party'),
-(3, 'Cooperative'),
-(4, 'Family');
+INSERT INTO GameGenres (genre) VALUES
+('Strategy'),
+('Party'),
+('Cooperative'),
+('Family');
 
 -- -----------------------------------------------------
 -- Table: Staff
@@ -47,10 +41,10 @@ CREATE TABLE Staff (
   PRIMARY KEY (staffID)
 ) ENGINE=InnoDB;
 
-INSERT INTO Staff (staffID, firstName, lastName) VALUES
-(1, 'Bagel', 'Smith'),
-(2, 'Zoe', 'Smith'),
-(3, 'Molly', 'Smith');
+INSERT INTO Staff (firstName, lastName) VALUES
+('Bagel', 'Smith'),
+('Zoe', 'Smith'),
+('Molly', 'Smith');
 
 -- -----------------------------------------------------
 -- Table: Patrons
@@ -65,10 +59,10 @@ CREATE TABLE Patrons (
   UNIQUE (email)
 ) ENGINE=InnoDB;
 
-INSERT INTO Patrons (patronID, firstName, lastName, email, phoneNumber) VALUES
-(1, 'Optimus', 'Prime', 'op@gmail.com', '8031231984'),
-(2, 'Ray', 'Bradbury', 'Ray@hotmail.com', '1238675309'),
-(3, 'George', 'Washington', 'cherrytree@yahoo.com', '9990041776');
+INSERT INTO Patrons (firstName, lastName, email, phoneNumber) VALUES
+('Optimus', 'Prime', 'op@gmail.com', '8031231984'),
+('Ray', 'Bradbury', 'Ray@hotmail.com', '1238675309'),
+('George', 'Washington', 'cherrytree@yahoo.com', '9990041776');
 
 -- -----------------------------------------------------
 -- Table: BoardGames
@@ -90,13 +84,13 @@ CREATE TABLE BoardGames (
 ) ENGINE=InnoDB;
 
 INSERT INTO BoardGames 
-(boardGameID, title, publisher, minPlayers, maxPlayers, complexity, GameGenres_gameGenreID)
+(title, publisher, minPlayers, maxPlayers, complexity, GameGenres_gameGenreID)
 VALUES
-(1, 'Catan', 'Kosmos', 3, 4, 2, 1),
-(2, 'Pandemic', 'Z-Man Games', 2, 4, 3, 3),
-(3, 'Codenames', 'Czech Games Edition', 2, 8, 1, 2),
-(4, 'Ticket to Ride', 'Days of Wonder', 2, 5, 2, 4),
-(5, 'Azul', 'Next Move Games', 2, 4, 2, 4);
+('Catan', 'Kosmos', 3, 4, 2, 1),
+('Pandemic', 'Z-Man Games', 2, 4, 3, 3),
+('Codenames', 'Czech Games Edition', 2, 8, 1, 2),
+('Ticket to Ride', 'Days of Wonder', 2, 5, 2, 4),
+('Azul', 'Next Move Games', 2, 4, 2, 4);
 
 -- -----------------------------------------------------
 -- Table: Checkouts
@@ -122,11 +116,11 @@ CREATE TABLE Checkouts (
 ) ENGINE=InnoDB;
 
 INSERT INTO Checkouts 
-(checkoutID, checkoutDate, dueDate, returnDate, Patrons_patronID, Staff_staffID)
+(checkoutDate, dueDate, returnDate, Patrons_patronID, Staff_staffID)
 VALUES
-(1, '2026-01-01', '2026-01-08', NULL, 1, 1),
-(2, '2026-02-05', '2026-02-06', '2026-02-06', 2, 2),
-(3, '2026-02-06', '2026-02-20', NULL, 3, 3);
+('2026-01-01', '2026-01-08', NULL, 1, 1),
+('2026-02-05', '2026-02-06', '2026-02-06', 2, 2),
+('2026-02-06', '2026-02-20', NULL, 3, 3);
 
 -- -----------------------------------------------------
 -- Table: CheckoutItems (M:M)
@@ -150,17 +144,11 @@ CREATE TABLE CheckoutItems (
 ) ENGINE=InnoDB;
 
 INSERT INTO CheckoutItems 
-(checkoutItemID, BoardGames_boardGameID, Checkouts_checkoutID)
+(BoardGames_boardGameID, Checkouts_checkoutID)
 VALUES
-(13, 1, 1),
-(14, 3, 1),
-(15, 2, 2),
-(16, 4, 2);
+(1, 1),
+(3, 1),
+(2, 2),
+(4, 2);
 
 SET FOREIGN_KEY_CHECKS=1;
-
-END //
-DELIMITER ;
-
--- To reset database:
--- CALL sp_load_boardgamedb();
