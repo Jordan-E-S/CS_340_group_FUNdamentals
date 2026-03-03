@@ -1,237 +1,325 @@
-from flask import Flask, render_template, request, redirect, url_for
-import mysql.connector
+# Based on the flask template provided from the cs340 course with original modifications by Jordan Smith. 
+# Further modified by chatgpt for bug eliminnation and code cleanup.
+# The above applies to all code related to this project step 3, including the database connector and the html templates.
+# ########################################
+# ########## SETUP
+
+from flask import Flask, render_template, request, redirect
+import database.db_connector as db
+
+PORT = 25194
 
 app = Flask(__name__)
 
-# Database connection
-db = mysql.connector.connect(
-    host="localhost",
-    user="your_username",
-    password="your_password",
-    database="cs340_smitjor8"
-)
+# #######################################
+# ########## ROUTE HANDLERS
 
-cursor = db.cursor(dictionary=True)
-
-
-# ==========================
-# HOME
-# ==========================
-@app.route("/")
+# READ ROUTES
+@app.route("/", methods=["GET"])
 def home():
-    return render_template("home.j2")
+    try:
+        return render_template("home.j2")
+
+    except Exception as e:
+        print(f"Error rendering page: {e}")
+        return "An error occurred while rendering the page.", 500
 
 
-# ==========================
-# GAME GENRES
-# ==========================
-@app.route("/gamegenres")
+# #######################################
+# ########## GAME GENRES
+
+@app.route("/gamegenres", methods=["GET"])
 def gamegenres():
-    cursor.execute("SELECT * FROM GameGenres")
-    genres = cursor.fetchall()
+    dbConnection = db.connectDB()
+    genres = db.query(dbConnection, "SELECT * FROM GameGenres ORDER BY genre;").fetchall()
+    dbConnection.close()
     return render_template("gamegenres.j2", genres=genres)
 
 
 @app.route("/add_genre", methods=["POST"])
 def add_genre():
-    genre = request.form["genre"]
-    cursor.execute("INSERT INTO GameGenres (genre) VALUES (%s)", (genre,))
-    db.commit()
+    genre = request.form.get("genre")
+
+    dbConnection = db.connectDB()
+    db.query(dbConnection, "INSERT INTO GameGenres (genre) VALUES (%s);", (genre,))
+    dbConnection.close()
     return redirect("/gamegenres")
 
 
 @app.route("/delete_genre", methods=["POST"])
 def delete_genre():
+    gameGenreID = request.form.get("gameGenreID")
+
+    dbConnection = db.connectDB()
     try:
-        genre_id = request.form["gameGenreID"]
-        cursor.execute("DELETE FROM GameGenres WHERE gameGenreID = %s", (genre_id,))
-        db.commit()
+        db.query(dbConnection, "DELETE FROM GameGenres WHERE gameGenreID = %s;", (gameGenreID,))
+        dbConnection.close()
         return redirect("/gamegenres")
-    except:
+    except Exception:
+        dbConnection.close()
         return redirect("/gamegenres?error=genre_in_use")
 
 
-# ==========================
-# BOARD GAMES
-# ==========================
-@app.route("/boardgames")
+# #######################################
+# ########## BOARD GAMES
+
+@app.route("/boardgames", methods=["GET"])
 def boardgames():
-    cursor.execute("""
-        SELECT bg.*, g.genre
+    dbConnection = db.connectDB()
+
+    query = """
+        SELECT bg.boardGameID, bg.title, bg.publisher,
+               bg.minPlayers, bg.maxPlayers, bg.complexity,
+               bg.GameGenres_gameGenreID,
+               gg.genre
         FROM BoardGames bg
-        JOIN GameGenres g
-        ON bg.GameGenres_gameGenreID = g.gameGenreID
-    """)
-    boardgames = cursor.fetchall()
+        INNER JOIN GameGenres gg
+            ON bg.GameGenres_gameGenreID = gg.gameGenreID;
+    """
+    boardgames = db.query(dbConnection, query).fetchall()
 
-    cursor.execute("SELECT * FROM GameGenres")
-    genres = cursor.fetchall()
+    genre_query = "SELECT gameGenreID, genre FROM GameGenres ORDER BY genre;"
+    genres = db.query(dbConnection, genre_query).fetchall()
 
+    dbConnection.close()
     return render_template("boardgames.j2", boardgames=boardgames, genres=genres)
 
 
 @app.route("/add_boardgame", methods=["POST"])
 def add_boardgame():
-    data = (
-        request.form["title"],
-        request.form["publisher"],
-        request.form["minPlayers"],
-        request.form["maxPlayers"],
-        request.form["complexity"],
-        request.form["gameGenreID"]
-    )
-    cursor.execute("""
-        INSERT INTO BoardGames
-        (title, publisher, minPlayers, maxPlayers, complexity, GameGenres_gameGenreID)
-        VALUES (%s, %s, %s, %s, %s, %s)
-    """, data)
-    db.commit()
+    title = request.form.get("title")
+    publisher = request.form.get("publisher")
+    minPlayers = request.form.get("minPlayers")
+    maxPlayers = request.form.get("maxPlayers")
+    complexity = request.form.get("complexity")
+    gameGenreID = request.form.get("gameGenreID")  # FK dropdown
+
+    dbConnection = db.connectDB()
+    query = """
+        INSERT INTO BoardGames (title, publisher, minPlayers, maxPlayers, complexity, GameGenres_gameGenreID)
+        VALUES (%s, %s, %s, %s, %s, %s);
+    """
+    db.query(dbConnection, query, (title, publisher, minPlayers, maxPlayers, complexity, gameGenreID))
+    dbConnection.close()
     return redirect("/boardgames")
 
 
 @app.route("/update_boardgame", methods=["POST"])
 def update_boardgame():
-    data = (
-        request.form["title"],
-        request.form["publisher"],
-        request.form["minPlayers"],
-        request.form["maxPlayers"],
-        request.form["complexity"],
-        request.form["gameGenreID"],
-        request.form["boardGameID"]
-    )
-    cursor.execute("""
+    boardGameID = request.form.get("boardGameID")
+    title = request.form.get("title")
+    publisher = request.form.get("publisher")
+    minPlayers = request.form.get("minPlayers")
+    maxPlayers = request.form.get("maxPlayers")
+    complexity = request.form.get("complexity")
+    gameGenreID = request.form.get("gameGenreID")
+
+    dbConnection = db.connectDB()
+    query = """
         UPDATE BoardGames
-        SET title=%s, publisher=%s, minPlayers=%s,
-            maxPlayers=%s, complexity=%s,
-            GameGenres_gameGenreID=%s
-        WHERE boardGameID=%s
-    """, data)
-    db.commit()
+        SET title=%s, publisher=%s, minPlayers=%s, maxPlayers=%s, complexity=%s, GameGenres_gameGenreID=%s
+        WHERE boardGameID=%s;
+    """
+    db.query(dbConnection, query, (title, publisher, minPlayers, maxPlayers, complexity, gameGenreID, boardGameID))
+    dbConnection.close()
     return redirect("/boardgames")
 
 
-# ==========================
-# PATRONS
-# ==========================
-@app.route("/patrons")
+# #######################################
+# ########## PATRONS
+
+@app.route("/patrons", methods=["GET"])
 def patrons():
-    cursor.execute("SELECT * FROM Patrons")
-    patrons = cursor.fetchall()
+    dbConnection = db.connectDB()
+
+    query = "SELECT * FROM Patrons;"
+    patrons = db.query(dbConnection, query).fetchall()
+
+    dbConnection.close()
     return render_template("patrons.j2", patrons=patrons)
 
 
 @app.route("/add_patron", methods=["POST"])
 def add_patron():
-    data = (
-        request.form["firstName"],
-        request.form["lastName"],
-        request.form["email"],
-        request.form["phoneNumber"]
-    )
-    cursor.execute("""
+    firstName = request.form.get("firstName")
+    lastName = request.form.get("lastName")
+    email = request.form.get("email")
+    phoneNumber = request.form.get("phoneNumber")
+
+    dbConnection = db.connectDB()
+    query = """
         INSERT INTO Patrons (firstName, lastName, email, phoneNumber)
-        VALUES (%s, %s, %s, %s)
-    """, data)
-    db.commit()
+        VALUES (%s, %s, %s, %s);
+    """
+    db.query(dbConnection, query, (firstName, lastName, email, phoneNumber))
+    dbConnection.close()
     return redirect("/patrons")
 
 
 @app.route("/delete_patron", methods=["POST"])
 def delete_patron():
+    patronID = request.form.get("patronID")
+
+    dbConnection = db.connectDB()
     try:
-        patron_id = request.form["patronID"]
-        cursor.execute("DELETE FROM Patrons WHERE patronID=%s", (patron_id,))
-        db.commit()
+        db.query(dbConnection, "DELETE FROM Patrons WHERE patronID = %s;", (patronID,))
+        dbConnection.close()
         return redirect("/patrons")
-    except:
+    except Exception as e:
+        dbConnection.close()
+        # If FK blocks deletion, you can show a message via querystring
         return redirect("/patrons?error=patron_has_checkouts")
 
 
-# ==========================
-# STAFF
-# ==========================
-@app.route("/staff")
+# #######################################
+# ########## STAFF
+
+@app.route("/staff", methods=["GET"])
 def staff():
-    cursor.execute("SELECT * FROM Staff")
-    staff = cursor.fetchall()
+    dbConnection = db.connectDB()
+
+    query = "SELECT * FROM Staff;"
+    staff = db.query(dbConnection, query).fetchall()
+
+    dbConnection.close()
     return render_template("staff.j2", staff=staff)
 
 
-# ==========================
-# CHECKOUTS
-# ==========================
-@app.route("/checkouts")
+# #######################################
+# ########## CHECKOUTS
+
+@app.route("/checkouts", methods=["GET"])
 def checkouts():
-    cursor.execute("""
-        SELECT c.*, 
+    dbConnection = db.connectDB()
+
+    query = """
+        SELECT c.checkoutID, c.checkoutDate, c.dueDate, c.returnDate,
+               c.Patrons_patronID, c.Staff_staffID,
                p.firstName AS patronFirstName,
-               p.lastName AS patronLastName,
+               p.lastName  AS patronLastName,
                s.firstName AS staffFirstName,
-               s.lastName AS staffLastName
+               s.lastName  AS staffLastName
         FROM Checkouts c
-        JOIN Patrons p ON c.Patrons_patronID = p.patronID
-        JOIN Staff s ON c.Staff_staffID = s.staffID
-    """)
-    checkouts = cursor.fetchall()
-    return render_template("checkouts.j2", checkouts=checkouts)
+        INNER JOIN Patrons p ON c.Patrons_patronID = p.patronID
+        INNER JOIN Staff s   ON c.Staff_staffID = s.staffID;
+    """
+    checkouts = db.query(dbConnection, query).fetchall()
+
+    patrons = db.query(
+        dbConnection,
+        "SELECT patronID, firstName, lastName FROM Patrons ORDER BY lastName, firstName;"
+    ).fetchall()
+
+    staffMembers = db.query(
+        dbConnection,
+        "SELECT staffID, firstName, lastName FROM Staff ORDER BY lastName, firstName;"
+    ).fetchall()
+
+    dbConnection.close()
+    return render_template("checkouts.j2", checkouts=checkouts, patrons=patrons, staffMembers=staffMembers)
 
 
-# ==========================
-# CHECKOUT ITEMS (M:M)
-# ==========================
-@app.route("/checkoutitems")
+# #######################################
+# ########## CHECKOUT ITEMS
+
+@app.route("/checkoutitems", methods=["GET"])
 def checkoutitems():
-    cursor.execute("""
-        SELECT ci.*, bg.title,
-               c.checkoutID,
-               p.firstName AS patronName
+    dbConnection = db.connectDB()
+
+    query = """
+        SELECT ci.checkoutItemID,
+               ci.Checkouts_checkoutID,
+               ci.BoardGames_boardGameID,
+               bg.title AS gameTitle,
+               CONCAT(p.firstName, ' ', p.lastName) AS patronName
         FROM CheckoutItems ci
-        JOIN BoardGames bg ON ci.BoardGames_boardGameID = bg.boardGameID
-        JOIN Checkouts c ON ci.Checkouts_checkoutID = c.checkoutID
-        JOIN Patrons p ON c.Patrons_patronID = p.patronID
-    """)
-    checkoutitems = cursor.fetchall()
+        INNER JOIN BoardGames bg ON ci.BoardGames_boardGameID = bg.boardGameID
+        INNER JOIN Checkouts c   ON ci.Checkouts_checkoutID = c.checkoutID
+        INNER JOIN Patrons p     ON c.Patrons_patronID = p.patronID
+        ORDER BY ci.checkoutItemID;
+    """
+    checkoutitems = db.query(dbConnection, query).fetchall()
 
-    cursor.execute("SELECT * FROM BoardGames")
-    boardgames = cursor.fetchall()
+    boardgames = db.query(
+        dbConnection,
+        "SELECT boardGameID, title FROM BoardGames ORDER BY title;"
+    ).fetchall()
 
-    cursor.execute("""
-        SELECT c.checkoutID, p.firstName AS patronName
+    checkouts = db.query(
+        dbConnection,
+        """
+        SELECT c.checkoutID,
+               CONCAT(p.firstName, ' ', p.lastName) AS patronName
         FROM Checkouts c
-        JOIN Patrons p ON c.Patrons_patronID = p.patronID
-    """)
-    checkouts = cursor.fetchall()
+        INNER JOIN Patrons p ON c.Patrons_patronID = p.patronID
+        ORDER BY c.checkoutID;
+        """
+    ).fetchall()
 
-    return render_template("checkoutitems.j2",
-                           checkoutitems=checkoutitems,
-                           boardgames=boardgames,
-                           checkouts=checkouts)
+    dbConnection.close()
+    return render_template("checkoutitems.j2", checkoutitems=checkoutitems, boardgames=boardgames, checkouts=checkouts)
 
 
 @app.route("/add_checkoutitem", methods=["POST"])
 def add_checkoutitem():
-    data = (
-        request.form["boardGameID"],
-        request.form["checkoutID"]
-    )
-    cursor.execute("""
-        INSERT INTO CheckoutItems
-        (BoardGames_boardGameID, Checkouts_checkoutID)
-        VALUES (%s, %s)
-    """, data)
-    db.commit()
+    boardGameID = request.form.get("boardGameID")
+    checkoutID = request.form.get("checkoutID")
+
+    dbConnection = db.connectDB()
+    query = """
+        INSERT INTO CheckoutItems (BoardGames_boardGameID, Checkouts_checkoutID)
+        VALUES (%s, %s);
+    """
+    db.query(dbConnection, query, (boardGameID, checkoutID))
+    dbConnection.close()
+    return redirect("/checkoutitems")
+
+
+@app.route("/update_checkoutitem", methods=["POST"])
+def update_checkoutitem():
+    checkoutItemID = request.form.get("checkoutItemID")
+    boardGameID = request.form.get("boardGameID")
+    checkoutID = request.form.get("checkoutID")
+
+    dbConnection = db.connectDB()
+    query = """
+        UPDATE CheckoutItems
+        SET BoardGames_boardGameID=%s, Checkouts_checkoutID=%s
+        WHERE checkoutItemID=%s;
+    """
+    db.query(dbConnection, query, (boardGameID, checkoutID, checkoutItemID))
+    dbConnection.close()
     return redirect("/checkoutitems")
 
 
 @app.route("/delete_checkoutitem", methods=["POST"])
 def delete_checkoutitem():
-    checkoutItemID = request.form["checkoutItemID"]
-    cursor.execute("DELETE FROM CheckoutItems WHERE checkoutItemID=%s",
-                   (checkoutItemID,))
-    db.commit()
+    checkoutItemID = request.form.get("checkoutItemID")
+
+    dbConnection = db.connectDB()
+    db.query(dbConnection, "DELETE FROM CheckoutItems WHERE checkoutItemID=%s;", (checkoutItemID,))
+    dbConnection.close()
     return redirect("/checkoutitems")
 
+# #######################################
+# ########## Reset Database
+@app.route("/reset_database", methods=["POST"])
+@app.route("/reset_database", methods=["POST"])
+def reset_database():
+    dbConnection = db.connectDB()
+    try:
+        db.query(dbConnection, "CALL sp_reset_boardgamedb();")
+        dbConnection.close()
+        return redirect("/?reset=success")
+    except Exception as e:
+        dbConnection.close()
+        return f"Error resetting database: {e}", 500
+
+
+# ########################################
+# ########## LISTENER
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(
+        port=PORT, debug=True
+    )  # debug is an optional parameter. Behaves like nodemon in Node.
