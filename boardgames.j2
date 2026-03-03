@@ -1,67 +1,38 @@
 {% extends "main.j2" %}
 {% block content %}
-
 <h1>Board Games</h1>
 
-<h2>Add Board Game</h2>
-<form action="/add_boardgame" method="POST">
-  <label>Title:</label> <input type="text" name="title" required><br>
-  <label>Publisher:</label> <input type="text" name="publisher" required><br>
-  <label>Min Players:</label> <input type="number" name="minPlayers" min="1" required><br>
-  <label>Max Players:</label> <input type="number" name="maxPlayers" min="1" required><br>
-  <label>Complexity:</label> <input type="number" name="complexity" min="1" required><br>
+<form method="POST" action="/add_boardgame">
+Title: <input name="title" required>
+Publisher: <input name="publisher" required>
+Min: <input type="number" name="minPlayers" required>
+Max: <input type="number" name="maxPlayers" required>
+Complexity: <input type="number" name="complexity" required>
 
-  <label>Genre:</label>
-  <select name="gameGenreID" required>
-    {% for g in genres %}
-      <option value="{{ g.gameGenreID }}">{{ g.genre }}</option>
-    {% endfor %}
-  </select><br>
+<select name="gameGenreID">
+{% for g in genres %}
+<option value="{{ g.gameGenreID }}">{{ g.genre }}</option>
+{% endfor %}
+</select>
 
-  <input type="submit" value="Add Board Game">
+<button>Add</button>
 </form>
 
-<h2>Current Board Games</h2>
 <table border="1">
-  <tr>
-    <th>ID</th>
-    <th>Title</th>
-    <th>Publisher</th>
-    <th>Min</th>
-    <th>Max</th>
-    <th>Complexity</th>
-    <th>Genre</th>
-    <th>Update</th>
-  </tr>
-
-  {% for bg in boardgames %}
-  <tr>
-    <form action="/update_boardgame" method="POST">
-      <td>
-        {{ bg.boardGameID }}
-        <input type="hidden" name="boardGameID" value="{{ bg.boardGameID }}">
-      </td>
-      <td><input type="text" name="title" value="{{ bg.title }}" required></td>
-      <td><input type="text" name="publisher" value="{{ bg.publisher }}" required></td>
-      <td><input type="number" name="minPlayers" value="{{ bg.minPlayers }}" min="1" required></td>
-      <td><input type="number" name="maxPlayers" value="{{ bg.maxPlayers }}" min="1" required></td>
-      <td><input type="number" name="complexity" value="{{ bg.complexity }}" min="1" required></td>
-
-      <td>
-        <select name="gameGenreID" required>
-          {% for g in genres %}
-            <option value="{{ g.gameGenreID }}"
-              {% if g.gameGenreID == bg.GameGenres_gameGenreID %}selected{% endif %}>
-              {{ g.genre }}
-            </option>
-          {% endfor %}
-        </select>
-      </td>
-
-      <td><button type="submit">Update</button></td>
-    </form>
-  </tr>
-  {% endfor %}
+<tr>
+<th>ID</th><th>Title</th><th>Publisher</th>
+<th>Min</th><th>Max</th><th>Complexity</th><th>Genre</th>
+</tr>
+{% for bg in boardgames %}
+<tr>
+<td>{{ bg.boardGameID }}</td>
+<td>{{ bg.title }}</td>
+<td>{{ bg.publisher }}</td>
+<td>{{ bg.minPlayers }}</td>
+<td>{{ bg.maxPlayers }}</td>
+<td>{{ bg.complexity }}</td>
+<td>{{ bg.genre }}</td>
+</tr>
+{% endfor %}
 </table>
-
 {% endblock %}
