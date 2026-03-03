@@ -1,5 +1,30 @@
 {% extends "main.j2" %}
 {% block content %}
-<h1>Board Game Library Database</h1>
-<p>CS340 Final Project</p>
+
+<h1>Home page</h1>
+<div class="homepageDescription">
+    <p>Developer information and Project overview here.</p>
+</div>
+
+<h2>UI Pages</h2>
+<ul>
+  <li><a href="/gamegenres">Game Genres</a></li>
+  <li><a href="/boardgames">Board Games</a></li>
+  <li><a href="/patrons">Patrons</a></li>
+  <li><a href="/staff">Staff</a></li>
+  <li><a href="/checkouts">Checkouts</a></li>
+  <li><a href="/checkoutitems">Checkout Items (M:M)</a></li>
+</ul>
+
+<h2>Reset Database</h2>
+<form action="/reset_database" method="POST">
+    <button type="submit" onclick="return confirm('Are you sure you want to reset the database? This will erase current data.')">
+        RESET DATABASE
+    </button>
+</form>
+
+{% if request.args.get('reset') == 'success' %}
+  <p style="color:green;">Database has been reset successfully!</p>
+{% endif %}
+
 {% endblock %}
