@@ -1,28 +1,20 @@
 {% extends "main.j2" %}
 {% block content %}
-
 <h1>Checkouts</h1>
-
 <table border="1">
 <tr>
-    <th>ID</th>
-    <th>Checkout Date</th>
-    <th>Due Date</th>
-    <th>Return Date</th>
-    <th>Patron</th>
-    <th>Staff</th>
+<th>ID</th><th>Checkout</th><th>Due</th>
+<th>Return</th><th>Patron</th><th>Staff</th>
 </tr>
-
 {% for c in checkouts %}
 <tr>
-    <td>{{ c.checkoutID }}</td>
-    <td>{{ c.checkoutDate }}</td>
-    <td>{{ c.dueDate }}</td>
-    <td>{{ c.returnDate or "" }}</td>
-    <td>{{ c.patronFirstName }} {{ c.patronLastName }}</td>
-    <td>{{ c.staffFirstName }} {{ c.staffLastName }}</td>
+<td>{{ c.checkoutID }}</td>
+<td>{{ c.checkoutDate }}</td>
+<td>{{ c.dueDate }}</td>
+<td>{{ c.returnDate or "Not Returned" }}</td>
+<td>{{ c.patronFirstName }} {{ c.patronLastName }}</td>
+<td>{{ c.staffFirstName }} {{ c.staffLastName }}</td>
 </tr>
 {% endfor %}
 </table>
-
 {% endblock %}
