@@ -1,75 +1,69 @@
 -- Jordan Smith & Arthur Franklyn
 -- CS340 Final Project
--- PL/SQL Procedures File
--- Contains RESET procedure and one CUD example
-
--- =====================================================
--- RESET PROCEDURE
--- =====================================================
--- This procedure calls the DDL reset procedure
--- defined in ddl.sql
+-- PL/SQL: Reset Database Procedure
+-- Demonstrates one CUD operation (DELETE) for RESET button
 
 DROP PROCEDURE IF EXISTS sp_reset_boardgamedb;
 DELIMITER //
 
 CREATE PROCEDURE sp_reset_boardgamedb()
 BEGIN
-    CALL sp_load_boardgamedb();
-END //
+    -- =====================================================
+    -- DELETE all existing data (CUD operation)
+    -- =====================================================
+    SET FOREIGN_KEY_CHECKS=0;
 
-DELIMITER ;
+    DELETE FROM CheckoutItems;
+    DELETE FROM Checkouts;
+    DELETE FROM BoardGames;
+    DELETE FROM Patrons;
+    DELETE FROM Staff;
+    DELETE FROM GameGenres;
 
--- To reset the database:
--- CALL sp_reset_boardgamedb();
+    -- =====================================================
+    -- Re-insert sample data
+    -- =====================================================
+    INSERT INTO GameGenres (gameGenreID, genre) VALUES
+        (1, 'Strategy'),
+        (2, 'Party'),
+        (3, 'Cooperative'),
+        (4, 'Family');
 
+    INSERT INTO Staff (staffID, firstName, lastName) VALUES
+        (1, 'Bagel', 'Smith'),
+        (2, 'Zoe', 'Smith'),
+        (3, 'Molly', 'Smith');
 
+    INSERT INTO Patrons (patronID, firstName, lastName, email, phoneNumber) VALUES
+        (1, 'Optimus', 'Prime', 'op@gmail.com', '8031231984'),
+        (2, 'Ray', 'Bradbury', 'Ray@hotmail.com', '1238675309'),
+        (3, 'George', 'Washington', 'cherrytree@yahoo.com', '9990041776');
 
--- =====================================================
--- CUD EXAMPLE #1 (INSERT) – Add Patron
--- =====================================================
-
-DROP PROCEDURE IF EXISTS sp_add_patron;
-DELIMITER //
-
-CREATE PROCEDURE sp_add_patron(
-    IN p_firstName VARCHAR(50),
-    IN p_lastName VARCHAR(50),
-    IN p_email VARCHAR(100),
-    IN p_phone VARCHAR(20)
-)
-BEGIN
-    INSERT INTO Patrons
-    (firstName, lastName, email, phoneNumber)
+    INSERT INTO BoardGames 
+        (boardGameID, title, publisher, minPlayers, maxPlayers, complexity, GameGenres_gameGenreID)
     VALUES
-    (p_firstName, p_lastName, p_email, p_phone);
+        (1, 'Catan', 'Kosmos', 3, 4, 2, 1),
+        (2, 'Pandemic', 'Z-Man Games', 2, 4, 3, 3),
+        (3, 'Codenames', 'Czech Games Edition', 2, 8, 1, 2),
+        (4, 'Ticket to Ride', 'Days of Wonder', 2, 5, 2, 4),
+        (5, 'Azul', 'Next Move Games', 2, 4, 2, 4);
+
+    INSERT INTO Checkouts 
+        (checkoutID, checkoutDate, dueDate, returnDate, Patrons_patronID, Staff_staffID)
+    VALUES
+        (1, '2026-01-01', '2026-01-08', NULL, 1, 1),
+        (2, '2026-02-05', '2026-02-06', '2026-02-06', 2, 2),
+        (3, '2026-02-06', '2026-02-20', NULL, 3, 3);
+
+    INSERT INTO CheckoutItems 
+        (checkoutItemID, BoardGames_boardGameID, Checkouts_checkoutID)
+    VALUES
+        (13, 1, 1),
+        (14, 3, 1),
+        (15, 2, 2),
+        (16, 4, 2);
+
+    SET FOREIGN_KEY_CHECKS=1;
 END //
 
 DELIMITER ;
-
--- Example usage:
--- CALL sp_add_patron('Tony', 'Stark', 'ironman@avengers.com', '5550000000');
-
-
-
--- =====================================================
--- CUD EXAMPLE #2 (UPDATE) – Update BoardGame Complexity
--- =====================================================
--- Optional but demonstrates another CUD operation
-
-DROP PROCEDURE IF EXISTS sp_update_boardgame_complexity;
-DELIMITER //
-
-CREATE PROCEDURE sp_update_boardgame_complexity(
-    IN p_boardGameID INT,
-    IN p_newComplexity INT
-)
-BEGIN
-    UPDATE BoardGames
-    SET complexity = p_newComplexity
-    WHERE boardGameID = p_boardGameID;
-END //
-
-DELIMITER ;
-
--- Example usage:
--- CALL sp_update_boardgame_complexity(1, 4);
