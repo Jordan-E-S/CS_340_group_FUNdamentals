@@ -1,19 +1,21 @@
+import os
 import MySQLdb
 
 # Database credentials
-host = 'classmysql.engr.oregonstate.edu'    
-user = 'cs340_smitjor8'       
-passwd = '25194'    
-db = 'cs340_smitjor8'   
+# Uses environment variables if set; otherwise falls back to placeholders.
+host = os.getenv("DB_HOST", "REDACTED_HOST")
+user = os.getenv("DB_USER", "REDACTED_USER")
+passwd = os.getenv("DB_PASS", "REDACTED_PASS")
+db = os.getenv("DB_NAME", "REDACTED_DB")
 
-def connectDB(host = host, user = user, passwd = passwd, db = db):
+def connectDB(host=host, user=user, passwd=passwd, db=db):
     '''
     connects to a database and returns a database object
     '''
-    dbConnection = MySQLdb.connect(host,user,passwd,db)
+    dbConnection = MySQLdb.connect(host, user, passwd, db)
     return dbConnection
 
-def query(dbConnection = None, query = None, query_params = ()):
+def query(dbConnection=None, query=None, query_params=()):
     '''
     executes a given SQL query on the given db connection and returns a Cursor object
     dbConnection: a MySQLdb connection object created by connectDB()
@@ -30,14 +32,8 @@ def query(dbConnection = None, query = None, query_params = ()):
         print("query is empty! Please pass a SQL query in query")
         return None
 
-    print("Executing %s with %s" % (query, query_params));
-    # Create a cursor to execute query. Why? Because apparently they optimize execution by retaining a reference according to PEP0249
+    print("Executing %s with %s" % (query, query_params))
     cursor = dbConnection.cursor(MySQLdb.cursors.DictCursor)
-
-    # Sanitize the query before executing it.
     cursor.execute(query, query_params)
-    
-    # Commit any changes to the database.
     dbConnection.commit()
-    
     return cursor

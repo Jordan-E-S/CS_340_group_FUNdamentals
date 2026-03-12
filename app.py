@@ -41,7 +41,7 @@ def add_genre():
     genre = request.form.get("genre")
 
     dbConnection = db.connectDB()
-    db.query(dbConnection, "INSERT INTO GameGenres (genre) VALUES (%s);", (genre,))
+    db.query(dbConnection, "CALL sp_add_genre(%s);", (genre,))
     dbConnection.close()
     return redirect("/gamegenres")
 
@@ -52,7 +52,7 @@ def delete_genre():
 
     dbConnection = db.connectDB()
     try:
-        db.query(dbConnection, "DELETE FROM GameGenres WHERE gameGenreID = %s;", (gameGenreID,))
+        db.query(dbConnection, "CALL sp_delete_genre(%s);", (gameGenreID,))
         dbConnection.close()
         return redirect("/gamegenres")
     except Exception:
@@ -95,11 +95,11 @@ def add_boardgame():
     gameGenreID = request.form.get("gameGenreID")  # FK dropdown
 
     dbConnection = db.connectDB()
-    query = """
-        INSERT INTO BoardGames (title, publisher, minPlayers, maxPlayers, complexity, GameGenres_gameGenreID)
-        VALUES (%s, %s, %s, %s, %s, %s);
-    """
-    db.query(dbConnection, query, (title, publisher, minPlayers, maxPlayers, complexity, gameGenreID))
+    db.query(
+        dbConnection,
+        "CALL sp_add_boardgame(%s, %s, %s, %s, %s, %s);",
+        (title, publisher, minPlayers, maxPlayers, complexity, gameGenreID)
+    )
     dbConnection.close()
     return redirect("/boardgames")
 
@@ -115,12 +115,8 @@ def update_boardgame():
     gameGenreID = request.form.get("gameGenreID")
 
     dbConnection = db.connectDB()
-    query = """
-        UPDATE BoardGames
-        SET title=%s, publisher=%s, minPlayers=%s, maxPlayers=%s, complexity=%s, GameGenres_gameGenreID=%s
-        WHERE boardGameID=%s;
-    """
-    db.query(dbConnection, query, (title, publisher, minPlayers, maxPlayers, complexity, gameGenreID, boardGameID))
+    query = "CALL sp_update_boardgame(%s, %s, %s, %s, %s, %s, %s);"
+    db.query(dbConnection, query, (boardGameID, title, publisher, minPlayers, maxPlayers, complexity, gameGenreID))
     dbConnection.close()
     return redirect("/boardgames")
 
@@ -147,10 +143,7 @@ def add_patron():
     phoneNumber = request.form.get("phoneNumber")
 
     dbConnection = db.connectDB()
-    query = """
-        INSERT INTO Patrons (firstName, lastName, email, phoneNumber)
-        VALUES (%s, %s, %s, %s);
-    """
+    query = "CALL sp_add_patron(%s, %s, %s, %s);"
     db.query(dbConnection, query, (firstName, lastName, email, phoneNumber))
     dbConnection.close()
     return redirect("/patrons")
@@ -162,7 +155,7 @@ def delete_patron():
 
     dbConnection = db.connectDB()
     try:
-        db.query(dbConnection, "DELETE FROM Patrons WHERE patronID = %s;", (patronID,))
+        db.query(dbConnection, "CALL sp_delete_patron(%s);", (patronID,))
         dbConnection.close()
         return redirect("/patrons")
     except Exception as e:
@@ -266,10 +259,7 @@ def add_checkoutitem():
     checkoutID = request.form.get("checkoutID")
 
     dbConnection = db.connectDB()
-    query = """
-        INSERT INTO CheckoutItems (BoardGames_boardGameID, Checkouts_checkoutID)
-        VALUES (%s, %s);
-    """
+    query = "CALL sp_add_checkout_item(%s, %s);"
     db.query(dbConnection, query, (boardGameID, checkoutID))
     dbConnection.close()
     return redirect("/checkoutitems")
@@ -282,12 +272,8 @@ def update_checkoutitem():
     checkoutID = request.form.get("checkoutID")
 
     dbConnection = db.connectDB()
-    query = """
-        UPDATE CheckoutItems
-        SET BoardGames_boardGameID=%s, Checkouts_checkoutID=%s
-        WHERE checkoutItemID=%s;
-    """
-    db.query(dbConnection, query, (boardGameID, checkoutID, checkoutItemID))
+    query = "CALL sp_update_checkout_item(%s, %s, %s);"
+    db.query(dbConnection, query, (checkoutItemID, boardGameID, checkoutID))
     dbConnection.close()
     return redirect("/checkoutitems")
 
@@ -297,7 +283,7 @@ def delete_checkoutitem():
     checkoutItemID = request.form.get("checkoutItemID")
 
     dbConnection = db.connectDB()
-    db.query(dbConnection, "DELETE FROM CheckoutItems WHERE checkoutItemID=%s;", (checkoutItemID,))
+    db.query(dbConnection, "CALL sp_delete_checkout_item(%s);", (checkoutItemID,))
     dbConnection.close()
     return redirect("/checkoutitems")
 
