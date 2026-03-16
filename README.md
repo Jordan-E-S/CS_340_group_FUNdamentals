@@ -1,0 +1,1 @@
+All code in all files are based on the CS 340 starter code, then modified/adapted to fit the needs of the dev team. During the debugging process a combination of chatgpt and copilot was used to assist in finding typos, and ensuring readability. The DDL was orginally based on the phpmyadmin export and then modified by the team.
